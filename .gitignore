@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Build
+.next/
+dist/
+*.egg-info/
+
+# Vercel
+.vercel
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+*.log
+
+# Test
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Misc
+*.swp
+*.swo
+
+# OMC
+.omc/
