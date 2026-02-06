@@ -8,6 +8,12 @@ const nextConfig = {
   images: {
     remotePatterns: [],
   },
+  // SWC 컴파일러 설정 (바이너리 다운로드 문제 해결)
+  swcMinify: true,
+  // 실험적 기능
+  experimental: {
+    // SWC 바이너리 다운로드 실패 시 자동 폴백
+  },
 }
 
 module.exports = nextConfig

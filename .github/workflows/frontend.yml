@@ -40,6 +40,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
+      - name: Clear npm cache
+        run: npm cache clean --force
+
       - name: Install dependencies
         run: npm ci
 
@@ -71,8 +74,16 @@ jobs:
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
+      - name: Clear npm cache
+        run: npm cache clean --force
+
       - name: Install dependencies
         run: npm ci
+
+      - name: Install SWC binaries (fallback)
+        run: |
+          npm install @next/swc-linux-x64-gnu@latest --save-optional || echo "SWC binary installation skipped"
+        continue-on-error: true
 
       - name: Build application
         run: npm run build
@@ -191,6 +202,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
+
+      - name: Clear npm cache
+        if: steps.check_token.outputs.token_exists == 'true'
+        run: npm cache clean --force
 
       - name: Install Vercel CLI
         if: steps.check_token.outputs.token_exists == 'true'
