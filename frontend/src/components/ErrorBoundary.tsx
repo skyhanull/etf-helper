@@ -17,7 +17,7 @@ interface State {
 
 /**
  * 에러 바운더리 컴포넌트
- * 
+ *
  * 사용 예시:
  * <ErrorBoundary>
  *   <YourComponent />
@@ -44,7 +44,7 @@ export class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // 에러 로깅 (향후 Sentry 등으로 전송 가능)
     console.error('ErrorBoundary caught an error:', error, errorInfo)
-    
+
     this.setState({
       error,
       errorInfo,
@@ -79,7 +79,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <CardContent className="space-y-4">
               {process.env.NODE_ENV === 'development' && this.state.error && (
                 <div className="rounded-md bg-muted p-4">
-                  <p className="text-sm font-mono text-destructive">
+                  <p className="font-mono text-sm text-destructive">
                     {this.state.error.toString()}
                   </p>
                   {this.state.errorInfo && (
@@ -98,10 +98,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 <Button onClick={this.handleReset} variant="default">
                   다시 시도
                 </Button>
-                <Button
-                  onClick={() => window.location.reload()}
-                  variant="outline"
-                >
+                <Button onClick={() => window.location.reload()} variant="outline">
                   페이지 새로고침
                 </Button>
               </div>

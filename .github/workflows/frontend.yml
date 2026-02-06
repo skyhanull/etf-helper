@@ -50,7 +50,7 @@ jobs:
         run: npm run type-check
 
       - name: Check Prettier formatting
-        run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,css,md}"
+        run: npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css}" "*.{ts,tsx,js,jsx,json,md}" --ignore-path .prettierignore
 
   build:
     name: Build

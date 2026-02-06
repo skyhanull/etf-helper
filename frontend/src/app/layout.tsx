@@ -11,11 +11,7 @@ export const metadata: Metadata = {
   description: '국내 ETF 정보 조회, 비교, 포트폴리오 관리 서비스',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
       <body className={inter.className}>

@@ -21,20 +21,14 @@ export default function Error({
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-destructive">오류가 발생했습니다</CardTitle>
-          <CardDescription>
-            페이지를 불러오는 중 문제가 발생했습니다.
-          </CardDescription>
+          <CardDescription>페이지를 불러오는 중 문제가 발생했습니다.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {process.env.NODE_ENV === 'development' && (
             <div className="rounded-md bg-muted p-4">
-              <p className="text-sm font-mono text-destructive">
-                {error.message}
-              </p>
+              <p className="font-mono text-sm text-destructive">{error.message}</p>
               {error.digest && (
-                <p className="mt-2 text-xs text-muted-foreground">
-                  에러 ID: {error.digest}
-                </p>
+                <p className="mt-2 text-xs text-muted-foreground">에러 ID: {error.digest}</p>
               )}
             </div>
           )}
@@ -42,10 +36,7 @@ export default function Error({
             <Button onClick={reset} variant="default">
               다시 시도
             </Button>
-            <Button
-              onClick={() => (window.location.href = '/')}
-              variant="outline"
-            >
+            <Button onClick={() => (window.location.href = '/')} variant="outline">
               홈으로 이동
             </Button>
           </div>
