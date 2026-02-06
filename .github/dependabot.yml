@@ -1,0 +1,27 @@
+version: 2
+updates:
+  # npm 패키지 (프론트엔드)
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"  # 매주 체크
+    open-pull-requests-limit: 5  # 최대 5개의 PR까지 열기
+    labels:
+      - "dependencies"
+      - "frontend"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # pip 패키지 (백엔드)
+  - package-ecosystem: "pip"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"  # 매주 체크
+    open-pull-requests-limit: 5  # 최대 5개의 PR까지 열기
+    labels:
+      - "dependencies"
+      - "backend"
+    commit-message:
+      prefix: "chore"
+      include: "scope"

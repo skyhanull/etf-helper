@@ -85,6 +85,15 @@ jobs:
           npm install @next/swc-linux-x64-gnu@latest --save-optional || echo "SWC binary installation skipped"
         continue-on-error: true
 
+      - name: Validate environment variables
+        run: |
+          if [ -z "${{ secrets.NEXT_PUBLIC_API_URL }}" ]; then
+            echo "⚠️ NEXT_PUBLIC_API_URL이 설정되지 않았습니다."
+            echo "기본값(http://localhost:8000)을 사용합니다."
+          else
+            echo "✅ NEXT_PUBLIC_API_URL이 설정되어 있습니다."
+          fi
+
       - name: Build application
         run: npm run build
         env:
@@ -160,6 +169,16 @@ jobs:
         if: steps.check_token.outputs.token_exists == 'true'
         working-directory: ./frontend
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Validate environment variables
+        if: steps.check_token.outputs.token_exists == 'true'
+        run: |
+          if [ -z "${{ secrets.NEXT_PUBLIC_API_URL }}" ]; then
+            echo "⚠️ NEXT_PUBLIC_API_URL이 설정되지 않았습니다."
+            echo "기본값(http://localhost:8000)을 사용합니다."
+          else
+            echo "✅ NEXT_PUBLIC_API_URL이 설정되어 있습니다."
+          fi
 
       - name: Build Project Artifacts
         if: steps.check_token.outputs.token_exists == 'true'

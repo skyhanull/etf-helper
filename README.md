@@ -2,6 +2,9 @@
 
 국내 ETF 정보 조회, 비교, 포트폴리오 관리 서비스
 
+![Frontend CI/CD](https://github.com/skyhanull/etf-helper/actions/workflows/frontend.yml/badge.svg)
+![Backend CI/CD](https://github.com/skyhanull/etf-helper/actions/workflows/backend.yml/badge.svg)
+
 ## 프로젝트 구조
 
 ```
