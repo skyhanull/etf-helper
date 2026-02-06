@@ -176,17 +176,30 @@ jobs:
     name: Deploy to Railway
     runs-on: ubuntu-latest
     needs: [lint]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && secrets.RAILWAY_TOKEN != ''
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Check Railway token
+        id: check_token
+        run: |
+          if [ -z "${{ secrets.RAILWAY_TOKEN }}" ]; then
+            echo "token_exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ RAILWAY_TOKEN secret이 설정되지 않았습니다. 배포를 스킵합니다."
+          else
+            echo "token_exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Railway 토큰이 설정되어 있습니다."
+          fi
+
       - name: Setup Railway CLI
+        if: steps.check_token.outputs.token_exists == 'true'
         run: |
           curl -fsSL https://railway.app/install.sh | sh
 
       - name: Deploy to Railway
+        if: steps.check_token.outputs.token_exists == 'true'
         working-directory: ./backend
         run: |
           railway up --service backend --detach
@@ -197,7 +210,7 @@ jobs:
     name: Deploy to Render
     runs-on: ubuntu-latest
     needs: [lint]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && secrets.RENDER_DEPLOY_HOOK_URL != ''
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     # Render는 GitHub 통합을 사용하는 것이 더 간단합니다
     # 이 워크플로우는 참고용이며, 실제로는 Render Dashboard에서 설정하는 것을 권장합니다
 
@@ -205,7 +218,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Check Render deploy hook
+        id: check_hook
+        run: |
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
+            echo "hook_exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ RENDER_DEPLOY_HOOK_URL secret이 설정되지 않았습니다. 배포를 스킵합니다."
+          else
+            echo "hook_exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Render Deploy Hook URL이 설정되어 있습니다."
+          fi
+
       - name: Trigger Render Deploy
+        if: steps.check_hook.outputs.hook_exists == 'true'
         run: |
           curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
         # Render Dashboard → Webhook에서 Deploy Hook URL 생성 필요
