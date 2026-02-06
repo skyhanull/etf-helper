@@ -1,5 +1,15 @@
-from sqlalchemy import Column, String, Integer, Float, Date, DateTime, BigInteger, ForeignKey
+from sqlalchemy import (
+    BigInteger,
+    Column,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+)
 from sqlalchemy.sql import func
+
 from app.core.database import Base
 
 

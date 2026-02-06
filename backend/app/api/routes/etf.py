@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Query
 from typing import Optional
-from app.schemas.response import success_response, paginated_response
+
+from fastapi import APIRouter, Query
+
+from app.schemas.response import paginated_response, success_response
 
 router = APIRouter()
 

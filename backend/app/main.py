@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+
+from app.api.routes import etf, health
 from app.core.config import settings
 from app.core.exceptions import AppException
-from app.api.routes import etf, health
 
 app = FastAPI(
     title="ETF Helper API",
