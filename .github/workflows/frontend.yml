@@ -80,6 +80,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Security audit
+        run: |
+          echo "🔒 Running security audit..."
+          npm audit --audit-level=moderate || echo "⚠️ Security vulnerabilities found (non-blocking)"
+        continue-on-error: true
+
       - name: Install SWC binaries (fallback)
         run: |
           npm install @next/swc-linux-x64-gnu@latest --save-optional || echo "SWC binary installation skipped"
@@ -94,8 +100,20 @@ jobs:
             echo "✅ NEXT_PUBLIC_API_URL이 설정되어 있습니다."
           fi
 
-      - name: Build application
-        run: npm run build
+      - name: Build application with timing
+        run: |
+          echo "🚀 Build started at $(date '+%Y-%m-%d %H:%M:%S')"
+          start_time=$(date +%s)
+          npm run build
+          end_time=$(date +%s)
+          duration=$((end_time - start_time))
+          minutes=$((duration / 60))
+          seconds=$((duration % 60))
+          echo "✅ Build completed in ${minutes}m ${seconds}s"
+          echo "## Build Performance" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Time**: ${minutes}m ${seconds}s" >> $GITHUB_STEP_SUMMARY
+          echo "- **Started**: $(date -d @$start_time '+%Y-%m-%d %H:%M:%S')" >> $GITHUB_STEP_SUMMARY
+          echo "- **Completed**: $(date -d @$end_time '+%Y-%m-%d %H:%M:%S')" >> $GITHUB_STEP_SUMMARY
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://localhost:8000' }}
 
