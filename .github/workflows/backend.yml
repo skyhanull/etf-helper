@@ -11,6 +11,12 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/backend.yml'
+  workflow_call:
+    secrets:
+      RAILWAY_TOKEN:
+        required: false
+      RENDER_DEPLOY_HOOK_URL:
+        required: false
 
 env:
   PYTHON_VERSION: '3.11'

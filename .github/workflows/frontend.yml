@@ -11,6 +11,12 @@ on:
     paths:
       - 'frontend/**'
       - '.github/workflows/frontend.yml'
+  workflow_call:
+    secrets:
+      VERCEL_TOKEN:
+        required: false
+      NEXT_PUBLIC_API_URL:
+        required: false
 
 env:
   NODE_VERSION: '20'
