@@ -6,7 +6,7 @@ export default function Home() {
           ETF Helper
         </h1>
         <p className="text-muted-foreground">
-          Setup complete. Ready to build.
+          Setup complete. Ready to build. 🚀
         </p>
       </div>
     </main>
