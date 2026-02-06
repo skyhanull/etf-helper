@@ -67,6 +67,16 @@ uvicorn app.main:app --reload
 
 ## 문서
 
+### 프로젝트 문서
 - [기획서](./docs/PLANNING.md)
 - [개발 컨벤션](./docs/CONVENTIONS.md)
 - [작업 계획](./docs/WORKPLAN.md)
+
+### CI/CD 문서
+- [CI/CD 문제 해결 가이드](./docs/CI_CD_TROUBLESHOOTING.md) - 발생한 문제와 해결 방법
+- [CI/CD 템플릿 사용 가이드](./docs/CI_CD_TEMPLATE_GUIDE.md) - 재사용 가능한 템플릿 사용법
+- [Vercel 배포 가이드](./docs/VERCEL_DEPLOYMENT.md)
+- [백엔드 배포 가이드](./docs/BACKEND_DEPLOYMENT.md)
+
+### CI/CD 템플릿
+- [템플릿 디렉토리](./.github/workflows/templates/) - 재사용 가능한 워크플로우 템플릿

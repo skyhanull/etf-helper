@@ -1,0 +1,248 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend.yml'
+  workflow_call:
+    secrets:
+      VERCEL_TOKEN:
+        required: false
+      NEXT_PUBLIC_API_URL:
+        required: false
+
+env:
+  NODE_VERSION: '20'  # Node.js 버전 설정
+
+jobs:
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend  # 작업 디렉토리 설정
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Clear npm cache
+        run: npm cache clean --force
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run TypeScript type check
+        run: npm run type-check
+
+      - name: Check Prettier formatting
+        run: npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css}" "*.{ts,tsx,js,jsx,json,md}" --ignore-path .prettierignore
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    needs: lint
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Clear npm cache
+        run: npm cache clean --force
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install SWC binaries (fallback)
+        run: |
+          npm install @next/swc-linux-x64-gnu@latest --save-optional || echo "SWC binary installation skipped"
+        continue-on-error: true
+
+      - name: Build application
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://localhost:8000' }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files
+          path: frontend/.next
+          retention-days: 7
+
+  # 테스트 (필요시 활성화)
+  # test:
+  #   name: Test
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: frontend
+  #   needs: lint
+  #
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: 'npm'
+  #
+  #     - name: Install dependencies
+  #       run: npm ci
+  #
+  #     - name: Run tests
+  #       run: npm run test
+
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: [lint, build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check Vercel token
+        id: check_token
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "token_exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ VERCEL_TOKEN secret이 설정되지 않았습니다. 배포를 스킵합니다."
+            echo "💡 Vercel GitHub 통합을 사용하거나, GitHub Secrets에 VERCEL_TOKEN을 추가하세요."
+          else
+            echo "token_exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Vercel 토큰이 설정되어 있습니다."
+          fi
+
+      - name: Setup Node.js
+        if: steps.check_token.outputs.token_exists == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Vercel CLI
+        if: steps.check_token.outputs.token_exists == 'true'
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        if: steps.check_token.outputs.token_exists == 'true'
+        working-directory: ./frontend
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        if: steps.check_token.outputs.token_exists == 'true'
+        working-directory: ./frontend
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://localhost:8000' }}
+
+      - name: Deploy Project Artifacts to Vercel
+        if: steps.check_token.outputs.token_exists == 'true'
+        id: deploy
+        working-directory: ./frontend
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+  preview:
+    name: Deploy Preview to Vercel
+    runs-on: ubuntu-latest
+    needs: [lint, build]
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check Vercel token
+        id: check_token
+        run: |
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then
+            echo "token_exists=false" >> $GITHUB_OUTPUT
+            echo "⚠️ VERCEL_TOKEN secret이 설정되지 않았습니다. Preview 배포를 스킵합니다."
+          else
+            echo "token_exists=true" >> $GITHUB_OUTPUT
+            echo "✅ Vercel 토큰이 설정되어 있습니다."
+          fi
+
+      - name: Setup Node.js
+        if: steps.check_token.outputs.token_exists == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Clear npm cache
+        if: steps.check_token.outputs.token_exists == 'true'
+        run: npm cache clean --force
+
+      - name: Install Vercel CLI
+        if: steps.check_token.outputs.token_exists == 'true'
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        if: steps.check_token.outputs.token_exists == 'true'
+        working-directory: ./frontend
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        if: steps.check_token.outputs.token_exists == 'true'
+        working-directory: ./frontend
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://localhost:8000' }}
+
+      - name: Deploy Project Artifacts to Vercel
+        if: steps.check_token.outputs.token_exists == 'true'
+        id: deploy
+        working-directory: ./frontend
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Comment PR with Preview URL
+        if: steps.check_token.outputs.token_exists == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `#### 🔍 Preview Deployment
+            
+            Preview: ${{ steps.deploy.outputs.preview-url }}
+            
+            Built with commit ${{ github.sha }}`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
