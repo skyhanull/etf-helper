@@ -30,5 +30,5 @@ slowapi==0.1.9
 
 # Development
 ruff==0.3.0
-pytest==8.0.0
+pytest==9.0.2
 pytest-asyncio==0.24.0
